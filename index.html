@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>European Cities Card Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="startScreen" class="screen active">
+            <h1>🗺️ Europe Travel Challenge</h1>
+            <p>Choose cities together for your European adventure!</p>
+            <div class="input-group">
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+            </div>
+            <button id="createGameBtn" class="btn btn-primary">Create New Game</button>
+            <div class="divider">OR</div>
+            <div class="input-group">
+                <input type="text" id="gameCode" placeholder="Enter game code" maxlength="6">
+            </div>
+            <button id="joinGameBtn" class="btn btn-secondary">Join Game</button>
+        </div>
+
+        <!-- Waiting Screen -->
+        <div id="waitingScreen" class="screen">
+            <h2>Waiting Room</h2>
+            <div class="game-code-display">
+                <p>Game Code:</p>
+                <div class="code" id="displayGameCode"></div>
+            </div>
+            <p class="info-text">Share this code with your partner</p>
+            <div id="playersList" class="players-list"></div>
+            <button id="startGameBtn" class="btn btn-primary" style="display: none;">Start Game</button>
+            <button id="leaveWaitingBtn" class="btn btn-secondary">Leave</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <div class="player-info">
+                    <span id="currentPlayer"></span>
+                </div>
+                <div class="score-info">
+                    <span id="scoreDisplay">Cards: 0/10</span>
+                </div>
+            </div>
+            
+            <div class="card-container" id="cardContainer">
+                <div class="card" id="currentCard">
+                    <div class="card-content">
+                        <div class="card-emoji"></div>
+                        <h2 class="card-city"></h2>
+                        <p class="card-country"></p>
+                        <div class="card-description"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="choice-indicators">
+                <div class="indicator left">✗</div>
+                <div class="indicator right">✓</div>
+            </div>
+
+            <div class="controls">
+                <button id="rejectBtn" class="btn btn-reject">✗ Skip</button>
+                <button id="acceptBtn" class="btn btn-accept">✓ Choose</button>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <h2>🎉 Your European Itinerary!</h2>
+            <div id="selectedCities" class="selected-cities"></div>
+            <div class="final-stats">
+                <p>Total cities chosen: <span id="totalChosen">0</span></p>
+                <p>Both players agreed on: <span id="mutualChoices">0</span></p>
+            </div>
+            <button id="playAgainBtn" class="btn btn-primary">Plan Another Trip</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="cities.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
