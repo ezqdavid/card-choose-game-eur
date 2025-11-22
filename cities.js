@@ -93,7 +93,7 @@ const cities = [
     {
         city: "Florence",
         country: "Italy",
-        emoji: "🎨",
+        emoji: "🎭",
         description: "Renaissance art and Tuscan beauty"
     },
     {
