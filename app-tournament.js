@@ -629,7 +629,13 @@ async function checkVotingComplete() {
             } else {
                 // Max extensions reached - use tiebreaker (random selection)
                 if (gameState.isHost) {
-                    // Randomly select winner from the two voted cities (voteList.length is guaranteed to be 2 here)
+                    // Safety check: ensure we have exactly 2 votes
+                    if (voteList.length !== 2) {
+                        console.error('Unexpected number of votes for tiebreaker:', voteList.length);
+                        return;
+                    }
+                    
+                    // Randomly select winner from the two voted cities
                     const randomIndex = Math.floor(Math.random() * 2);
                     const winnerCity = voteList[randomIndex].city;
                     
@@ -641,20 +647,23 @@ async function checkVotingComplete() {
                     });
                     
                     // Record winner after brief delay for message display
-                    // Using an immediately-invoked async function to properly handle the delay
                     const currentGameCode = gameState.gameCode;
                     const currentMatchIndex = gameState.currentMatch;
                     
-                    setTimeout(async () => {
+                    // Schedule tiebreaker resolution
+                    setTimeout(() => {
                         // Safety check: only proceed if we're still in the same game and match
                         if (gameState.gameCode === currentGameCode && 
                             gameState.currentMatch === currentMatchIndex) {
-                            try {
-                                await gameRef.child('tiebreaker').remove();
-                                await recordWinner(winnerCity);
-                            } catch (error) {
-                                console.error('Error in tiebreaker timeout:', error);
-                            }
+                            // Execute async operations and catch any errors
+                            (async () => {
+                                try {
+                                    await gameRef.child('tiebreaker').remove();
+                                    await recordWinner(winnerCity);
+                                } catch (error) {
+                                    console.error('Error in tiebreaker timeout:', error);
+                                }
+                            })();
                         }
                     }, TIEBREAKER_DISPLAY_DURATION);
                 }
