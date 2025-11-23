@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es-ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>European Cities Card Challenge - Demo</title>
+    <title>Desafío de Ciudades Europeas - Demo</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <!-- Start Screen -->
         <div id="startScreen" class="screen active">
-            <h1>🗺️ Europe Travel Challenge</h1>
-            <p>Demo Mode - Choose cities for your European adventure!</p>
-            <p style="font-size: 12px; color: #999;">Single-player demo (no sync)</p>
+            <h1>🗺️ Desafío Viajero por Europa</h1>
+            <p>Modo Demo - ¡Elegí ciudades para tu aventura europea!</p>
+            <p style="font-size: 12px; color: #999;">Demo de un jugador (sin sincronización)</p>
             <div class="input-group">
-                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <input type="text" id="playerName" placeholder="Ingresá tu nombre" maxlength="20">
             </div>
-            <button id="startDemoBtn" class="btn btn-primary">Start Demo</button>
+            <button id="startDemoBtn" class="btn btn-primary">Iniciar Demo</button>
         </div>
 
         <!-- Game Screen -->
@@ -26,7 +26,7 @@
                     <span id="currentPlayer"></span>
                 </div>
                 <div class="score-info">
-                    <span id="scoreDisplay">Cards: 0/20</span>
+                    <span id="scoreDisplay">Cartas: 0/20</span>
                 </div>
             </div>
             
@@ -47,19 +47,19 @@
             </div>
 
             <div class="controls">
-                <button id="rejectBtn" class="btn btn-reject">✗ Skip</button>
-                <button id="acceptBtn" class="btn btn-accept">✓ Choose</button>
+                <button id="rejectBtn" class="btn btn-reject">✗ Saltar</button>
+                <button id="acceptBtn" class="btn btn-accept">✓ Elegir</button>
             </div>
         </div>
 
         <!-- Results Screen -->
         <div id="resultsScreen" class="screen">
-            <h2>🎉 Your European Itinerary!</h2>
+            <h2>🎉 ¡Tu Itinerario Europeo!</h2>
             <div id="selectedCities" class="selected-cities"></div>
             <div class="final-stats">
-                <p>Total cities chosen: <span id="totalChosen">0</span></p>
+                <p>Total de ciudades elegidas: <span id="totalChosen">0</span></p>
             </div>
-            <button id="playAgainBtn" class="btn btn-primary">Plan Another Trip</button>
+            <button id="playAgainBtn" class="btn btn-primary">Planear Otro Viaje</button>
         </div>
     </div>
 

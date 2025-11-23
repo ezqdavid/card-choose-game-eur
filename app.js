@@ -54,12 +54,12 @@ function showMessage(message, type = 'waiting') {
 document.getElementById('createGameBtn').addEventListener('click', async () => {
     const playerName = document.getElementById('playerName').value.trim();
     if (!playerName) {
-        alert('Please enter your name');
+        alert('Por favor, ingresá tu nombre');
         return;
     }
 
     if (!database) {
-        alert('Firebase not configured. Please check config.js');
+        alert('Firebase no configurado. Por favor, verificá config.js');
         return;
     }
 
@@ -95,7 +95,7 @@ document.getElementById('createGameBtn').addEventListener('click', async () => {
         showScreen('waiting');
     } catch (error) {
         console.error('Error creating game:', error);
-        alert('Error creating game. Please try again.');
+        alert('Error al crear la partida. Por favor, intentá de nuevo.');
     }
 });
 
@@ -105,17 +105,17 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
     const gameCode = document.getElementById('gameCode').value.trim().toUpperCase();
 
     if (!playerName) {
-        alert('Please enter your name');
+        alert('Por favor, ingresá tu nombre');
         return;
     }
 
     if (!gameCode) {
-        alert('Please enter a game code');
+        alert('Por favor, ingresá un código de partida');
         return;
     }
 
     if (!database) {
-        alert('Firebase not configured. Please check config.js');
+        alert('Firebase no configurado. Por favor, verificá config.js');
         return;
     }
 
@@ -129,13 +129,13 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
         const snapshot = await gameRef.once('value');
 
         if (!snapshot.exists()) {
-            alert('Game not found. Please check the code.');
+            alert('Partida no encontrada. Por favor, verificá el código.');
             return;
         }
 
         const gameData = snapshot.val();
         if (gameData.status !== 'waiting') {
-            alert('This game has already started.');
+            alert('Esta partida ya comenzó.');
             return;
         }
 
@@ -155,7 +155,7 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
         showScreen('waiting');
     } catch (error) {
         console.error('Error joining game:', error);
-        alert('Error joining game. Please try again.');
+        alert('Error al unirse a la partida. Por favor, intentá de nuevo.');
     }
 });
 
@@ -273,7 +273,7 @@ function displayCard() {
     } else {
         // For selectable cities, show progress
         document.getElementById('scoreDisplay').textContent = 
-            `Cards: ${cardIndex + 1}/${cities.length}`;
+            `Cartas: ${cardIndex + 1}/${cities.length}`;
     }
 
     // Update controls visibility
@@ -417,7 +417,7 @@ async function makeChoice(accepted) {
         gameState.playerChoices[gameState.currentCardIndex] = accepted;
 
         // Show waiting message
-        showMessage('Waiting for your partner...', 'waiting');
+        showMessage('Esperando a tu compañero...', 'waiting');
     } catch (error) {
         console.error('Error saving choice:', error);
     }
@@ -447,9 +447,9 @@ async function checkBothPlayersChose(gameData) {
         const bothAccepted = choices1[0].accepted && choices2[0].accepted;
 
         if (bothAccepted) {
-            showMessage('🎉 Both chose this city!', 'match');
+            showMessage('🎉 ¡Ambos eligieron esta ciudad!', 'match');
         } else {
-            showMessage('Different choices', 'no-match');
+            showMessage('Diferentes elecciones', 'no-match');
         }
 
         // Move to next card after delay

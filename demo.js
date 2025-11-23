@@ -21,7 +21,7 @@ function showScreen(screenName) {
 document.getElementById('startDemoBtn').addEventListener('click', () => {
     const playerName = document.getElementById('playerName').value.trim();
     if (!playerName) {
-        alert('Please enter your name');
+        alert('Por favor, ingresá tu nombre');
         return;
     }
 
@@ -69,7 +69,7 @@ function displayCard() {
     } else {
         // For selectable cities, show progress
         document.getElementById('scoreDisplay').textContent = 
-            `Cards: ${cardIndex + 1}/${cities.length}`;
+            `Cartas: ${cardIndex + 1}/${cities.length}`;
     }
 
     // Update controls visibility
