@@ -18,6 +18,10 @@ let gameState = {
 let database = null;
 let gameRef = null;
 
+// Game configuration constants
+const MAX_DEBATE_EXTENSIONS = 2;
+const TIEBREAKER_DISPLAY_DURATION = 2000; // milliseconds
+
 // Initialize database
 try {
     database = firebase.database();
@@ -607,9 +611,8 @@ async function checkVotingComplete() {
         } else {
             // Disagreement - check extension count
             const currentExtensionCount = gameState.debateExtensionCount;
-            const MAX_EXTENSIONS = 2;
             
-            if (currentExtensionCount < MAX_EXTENSIONS) {
+            if (currentExtensionCount < MAX_DEBATE_EXTENSIONS) {
                 // Extend debate for another attempt
                 if (gameState.isHost) {
                     await gameRef.update({
@@ -626,7 +629,7 @@ async function checkVotingComplete() {
             } else {
                 // Max extensions reached - use tiebreaker (random selection)
                 if (gameState.isHost) {
-                    const randomIndex = Math.floor(Math.random() * 2);
+                    const randomIndex = Math.floor(Math.random() * voteList.length);
                     const winnerCity = voteList[randomIndex].city;
                     
                     // Show message about tiebreaker
@@ -640,7 +643,7 @@ async function checkVotingComplete() {
                     setTimeout(async () => {
                         await gameRef.child('tiebreaker').remove();
                         await recordWinner(winnerCity);
-                    }, 2000);
+                    }, TIEBREAKER_DISPLAY_DURATION);
                 }
             }
         }
