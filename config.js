@@ -5,14 +5,14 @@
 // 2. Enable Realtime Database
 // 3. Replace the config below with your actual Firebase credentials
 const firebaseConfig = {
-    apiKey: "AIzaSyDemoKeyForCardGameEurope123456789",
-    authDomain: "card-game-eur-demo.firebaseapp.com",
-    databaseURL: "https://card-game-eur-demo-default-rtdb.firebaseio.com",
-    projectId: "card-game-eur-demo",
-    storageBucket: "card-game-eur-demo.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef123456"
-};
+    apiKey: "AIzaSyAuf7tRXKmUGuA-3Ro4__AfGB6wgaxkXwI",
+    authDomain: "card-choose-game-eur.firebaseapp.com",
+    databaseURL: "https://card-choose-game-eur-default-rtdb.firebaseio.com",
+    projectId: "card-choose-game-eur",
+    storageBucket: "card-choose-game-eur.firebasestorage.app",
+    messagingSenderId: "1007358603482",
+    appId: "1:1007358603482:web:4789983f3b9737656575e3"
+  };
 
 // Note: This is a demo configuration that will NOT work.
 // To make this work in production:
