@@ -562,7 +562,7 @@ function startDebatePhase(gameData) {
     const debateTime = gameData.debateExtended ? 60 : 300;
     const extensionCount = gameData.debateExtensionCount || 0;
     let timerText = gameData.debateExtended ? 
-        `1 minute extended debate (attempt ${extensionCount} of 2)` : 
+        `1 minute extended debate (attempt ${extensionCount} of ${MAX_DEBATE_EXTENSIONS})` : 
         '5 minutes to discuss';
     
     // Show tiebreaker message if it exists
@@ -629,7 +629,8 @@ async function checkVotingComplete() {
             } else {
                 // Max extensions reached - use tiebreaker (random selection)
                 if (gameState.isHost) {
-                    const randomIndex = Math.floor(Math.random() * voteList.length);
+                    // Randomly select winner from the two voted cities (voteList.length is guaranteed to be 2 here)
+                    const randomIndex = Math.floor(Math.random() * 2);
                     const winnerCity = voteList[randomIndex].city;
                     
                     // Show message about tiebreaker
@@ -640,9 +641,21 @@ async function checkVotingComplete() {
                     });
                     
                     // Record winner after brief delay for message display
+                    // Using an immediately-invoked async function to properly handle the delay
+                    const currentGameCode = gameState.gameCode;
+                    const currentMatchIndex = gameState.currentMatch;
+                    
                     setTimeout(async () => {
-                        await gameRef.child('tiebreaker').remove();
-                        await recordWinner(winnerCity);
+                        // Safety check: only proceed if we're still in the same game and match
+                        if (gameState.gameCode === currentGameCode && 
+                            gameState.currentMatch === currentMatchIndex) {
+                            try {
+                                await gameRef.child('tiebreaker').remove();
+                                await recordWinner(winnerCity);
+                            } catch (error) {
+                                console.error('Error in tiebreaker timeout:', error);
+                            }
+                        }
                     }, TIEBREAKER_DISPLAY_DURATION);
                 }
             }
