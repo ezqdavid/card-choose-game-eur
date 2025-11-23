@@ -57,9 +57,9 @@ function showMessage(message, type = 'info') {
     alert(message); // Simplified for now
 }
 
-// Generate tournament bracket (8 cities for quarterfinals)
+// Generate tournament bracket (16 cities for round of 16, leading to quarterfinals, semifinals, final)
 function generateBracket() {
-    // Shuffle cities but keep Milan and Rome at the top if preferred
+    // Shuffle cities but keep Milan and Rome preferred
     let shuffled = [...cities];
     
     // Separate preferred and regular cities
@@ -70,17 +70,17 @@ function generateBracket() {
     preferred.sort(() => Math.random() - 0.5);
     regular.sort(() => Math.random() - 0.5);
     
-    // Take 8 cities (prefer Milan and Rome)
-    const bracketCities = [...preferred.slice(0, 2), ...regular].slice(0, 8);
+    // Take 16 cities total (include all preferred, fill rest with regular)
+    const bracketCities = [...preferred, ...regular].slice(0, 16);
     
-    // Create initial bracket (quarterfinals: 4 matches)
+    // Create initial bracket (round of 16: 8 matches with 16 cities)
     const bracket = [];
     for (let i = 0; i < bracketCities.length; i += 2) {
         bracket.push({
             city1: bracketCities[i],
             city2: bracketCities[i + 1],
             winner: null,
-            round: 'quarterfinals'
+            round: 'round-of-16'
         });
     }
     
@@ -622,9 +622,20 @@ async function recordWinner(winnerCityName) {
     
     if (completedMatches.length === roundMatches.length) {
         // Round complete - create next round or finish
-        if (currentMatch.round === 'quarterfinals') {
-            // Create semifinals
-            const winners = completedMatches.map(m => m.winner);
+        const winners = completedMatches.map(m => m.winner);
+        
+        if (currentMatch.round === 'round-of-16' && winners.length === 8) {
+            // Create quarterfinals (4 matches from 8 winners)
+            for (let i = 0; i < winners.length; i += 2) {
+                bracket.push({
+                    city1: winners[i],
+                    city2: winners[i + 1],
+                    winner: null,
+                    round: 'quarterfinals'
+                });
+            }
+        } else if (currentMatch.round === 'quarterfinals' && winners.length === 4) {
+            // Create semifinals (2 matches from 4 winners)
             for (let i = 0; i < winners.length; i += 2) {
                 bracket.push({
                     city1: winners[i],
@@ -633,9 +644,8 @@ async function recordWinner(winnerCityName) {
                     round: 'semifinals'
                 });
             }
-        } else if (currentMatch.round === 'semifinals') {
-            // Create final
-            const winners = completedMatches.map(m => m.winner);
+        } else if (currentMatch.round === 'semifinals' && winners.length === 2) {
+            // Create final (1 match from 2 winners)
             bracket.push({
                 city1: winners[0],
                 city2: winners[1],
@@ -643,11 +653,15 @@ async function recordWinner(winnerCityName) {
                 round: 'final'
             });
         } else if (currentMatch.round === 'final') {
-            // Tournament complete
+            // Tournament complete - take top 3 (final winner + 2 semifinal winners)
+            const semifinalWinners = bracket.filter(m => m.round === 'semifinals').map(m => m.winner);
+            const finalWinner = winner;
+            const top3 = [finalWinner, ...semifinalWinners].slice(0, 3);
+            
             await gameRef.update({
                 status: 'finished',
                 bracket: bracket,
-                winners: gameState.winners.slice(0, 3) // Top 3
+                winners: top3
             });
             return;
         }
