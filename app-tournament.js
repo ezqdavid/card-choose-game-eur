@@ -240,20 +240,144 @@ function updatePlayersList(players) {
         .join('');
 }
 
-// Start tournament button
+// Start tournament button (now goes to city selection)
 document.getElementById('startGameBtn').addEventListener('click', async () => {
     if (!gameState.isHost) return;
+    showCitySelection();
+});
 
+// City Selection Screen
+function showCitySelection() {
+    showScreen('citySelection');
+    
+    // Pre-select Milan and Rome
+    selectedCities = cities.filter(c => c.preferred);
+    
+    renderCityGrid();
+    updateSelectionCount();
+}
+
+function renderCityGrid() {
+    const grid = document.getElementById('citySelectionGrid');
+    const allCities = [...cities, ...customCities];
+    
+    grid.innerHTML = allCities.map((city, idx) => {
+        const isSelected = selectedCities.some(c => c.city === city.city);
+        const isPreferred = city.preferred;
+        const isDisabled = !isSelected && selectedCities.length >= 16;
+        
+        return `
+            <div class="city-selection-item ${isSelected ? 'selected' : ''} ${isPreferred ? 'preferred' : ''} ${isDisabled ? 'disabled' : ''}"
+                 data-index="${idx}"
+                 onclick="toggleCitySelection(${idx}, ${idx >= cities.length})">
+                <span class="city-emoji">${city.emoji}</span>
+                <div class="city-name">${city.city}</div>
+                <div class="city-country">${city.country}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.toggleCitySelection = function(index, isCustom) {
+    const city = isCustom ? customCities[index - cities.length] : cities[index];
+    const selectedIndex = selectedCities.findIndex(c => c.city === city.city);
+    
+    if (selectedIndex !== -1) {
+        // Deselect (but not if it's a preferred city)
+        if (!city.preferred) {
+            selectedCities.splice(selectedIndex, 1);
+        }
+    } else {
+        // Select (if under limit)
+        if (selectedCities.length < 16) {
+            selectedCities.push(city);
+        }
+    }
+    
+    renderCityGrid();
+    updateSelectionCount();
+};
+
+function updateSelectionCount() {
+    const countElem = document.getElementById('selectionCount');
+    countElem.textContent = `${selectedCities.length} / 16 cities selected`;
+    
+    const startBtn = document.getElementById('startTournamentBtn');
+    startBtn.disabled = selectedCities.length !== 16;
+}
+
+// Add custom city
+document.getElementById('addCustomCityBtn').addEventListener('click', () => {
+    const name = document.getElementById('customCityName').value.trim();
+    const country = document.getElementById('customCityCountry').value.trim();
+    const emoji = document.getElementById('customCityEmoji').value.trim();
+    const image = document.getElementById('customCityImage').value.trim();
+    const description = document.getElementById('customCityDescription').value.trim();
+    
+    if (!name || !country) {
+        alert('Please enter at least city name and country');
+        return;
+    }
+    
+    const customCity = {
+        city: name,
+        country: country,
+        emoji: emoji || '🏙️',
+        description: description || `Beautiful city of ${name}`,
+        image: image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
+        custom: true
+    };
+    
+    customCities.push(customCity);
+    
+    // Clear form
+    document.getElementById('customCityName').value = '';
+    document.getElementById('customCityCountry').value = '';
+    document.getElementById('customCityEmoji').value = '';
+    document.getElementById('customCityImage').value = '';
+    document.getElementById('customCityDescription').value = '';
+    
+    renderCityGrid();
+    alert(`Added ${name}!`);
+});
+
+// Start tournament with selected cities
+document.getElementById('startTournamentBtn').addEventListener('click', async () => {
+    if (!gameState.isHost || selectedCities.length !== 16) return;
+    
+    const bracket = generateBracketFromSelected(selectedCities);
+    
     try {
         await gameRef.update({
             status: 'playing',
             phase: 'bracket',
+            bracket: bracket,
+            selectedCities: selectedCities,
+            customCities: customCities,
             startedAt: Date.now()
         });
     } catch (error) {
-        console.error('Error starting game:', error);
+        console.error('Error starting tournament:', error);
     }
 });
+
+function generateBracketFromSelected(selectedCities) {
+    // Shuffle for random matchups
+    const shuffled = [...selectedCities].sort(() => Math.random() - 0.5);
+    
+    // Create quarterfinals (8 matches with 16 cities)
+    const bracket = [];
+    for (let i = 0; i < shuffled.length; i += 2) {
+        bracket.push({
+            city1: shuffled[i],
+            city2: shuffled[i + 1],
+            winner: null,
+            round: 'quarterfinals'
+        });
+    }
+    
+    return bracket;
+}
 
 // Leave waiting room
 document.getElementById('leaveWaitingBtn').addEventListener('click', () => {
@@ -323,11 +447,13 @@ function startWritingPhase(gameData) {
     
     if (!currentMatch) return;
     
-    // Display cities
+    // Display cities with images
+    document.getElementById('city1Image').src = currentMatch.city1.image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80';
     document.getElementById('city1Emoji').textContent = currentMatch.city1.emoji;
     document.getElementById('city1Name').textContent = currentMatch.city1.city;
     document.getElementById('city1Country').textContent = currentMatch.city1.country;
     
+    document.getElementById('city2Image').src = currentMatch.city2.image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80';
     document.getElementById('city2Emoji').textContent = currentMatch.city2.emoji;
     document.getElementById('city2Name').textContent = currentMatch.city2.city;
     document.getElementById('city2Country').textContent = currentMatch.city2.country;
@@ -392,11 +518,13 @@ function startDebatePhase(gameData) {
     
     if (!currentMatch) return;
     
-    // Display cities
+    // Display cities with images
+    document.getElementById('debate1Image').src = currentMatch.city1.image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80';
     document.getElementById('debate1Emoji').textContent = currentMatch.city1.emoji;
     document.getElementById('debate1Name').textContent = currentMatch.city1.city;
     document.getElementById('debate1Country').textContent = currentMatch.city1.country;
     
+    document.getElementById('debate2Image').src = currentMatch.city2.image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80';
     document.getElementById('debate2Emoji').textContent = currentMatch.city2.emoji;
     document.getElementById('debate2Name').textContent = currentMatch.city2.city;
     document.getElementById('debate2Country').textContent = currentMatch.city2.country;
