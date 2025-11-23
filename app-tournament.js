@@ -54,7 +54,7 @@ function showScreen(screenName) {
 }
 
 function showMessage(message, type = 'info') {
-    alert(message); // Simplified for now
+    alert(message);
 }
 
 // Generate tournament bracket (16 cities for round of 16, leading to quarterfinals, semifinals, final)
@@ -91,12 +91,12 @@ function generateBracket() {
 document.getElementById('createGameBtn').addEventListener('click', async () => {
     const playerName = document.getElementById('playerName').value.trim();
     if (!playerName) {
-        alert('Please enter your name');
+        alert(i18n.t('alert.name.required'));
         return;
     }
 
     if (!database) {
-        alert('Firebase not configured. Please check config.js');
+        alert(i18n.t('alert.firebase.error'));
         return;
     }
 
@@ -132,7 +132,7 @@ document.getElementById('createGameBtn').addEventListener('click', async () => {
         showScreen('waiting');
     } catch (error) {
         console.error('Error creating game:', error);
-        alert('Error creating game. Please try again.');
+        alert(i18n.t('alert.create.error'));
     }
 });
 
@@ -142,17 +142,17 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
     const gameCode = document.getElementById('gameCode').value.trim().toUpperCase();
 
     if (!playerName) {
-        alert('Please enter your name');
+        alert(i18n.t('alert.name.required'));
         return;
     }
 
     if (!gameCode) {
-        alert('Please enter a game code');
+        alert(i18n.t('alert.code.required'));
         return;
     }
 
     if (!database) {
-        alert('Firebase not configured. Please check config.js');
+        alert(i18n.t('alert.firebase.error'));
         return;
     }
 
@@ -166,13 +166,13 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
         const snapshot = await gameRef.once('value');
 
         if (!snapshot.exists()) {
-            alert('Game not found. Please check the code.');
+            alert(i18n.t('alert.game.notfound'));
             return;
         }
 
         const gameData = snapshot.val();
         if (gameData.status !== 'waiting') {
-            alert('This game has already started.');
+            alert(i18n.t('alert.game.started'));
             return;
         }
 
@@ -188,7 +188,7 @@ document.getElementById('joinGameBtn').addEventListener('click', async () => {
         showScreen('waiting');
     } catch (error) {
         console.error('Error joining game:', error);
-        alert('Error joining game. Please try again.');
+        alert(i18n.t('alert.join.error'));
     }
 });
 
@@ -300,7 +300,7 @@ window.toggleCitySelection = function(index, isCustom) {
 
 function updateSelectionCount() {
     const countElem = document.getElementById('selectionCount');
-    countElem.textContent = `${selectedCities.length} / 16 cities selected`;
+    countElem.textContent = `${selectedCities.length} / 16 ciudades seleccionadas`;
     
     const startBtn = document.getElementById('startTournamentBtn');
     startBtn.disabled = selectedCities.length !== 16;
@@ -315,7 +315,7 @@ document.getElementById('addCustomCityBtn').addEventListener('click', () => {
     const description = document.getElementById('customCityDescription').value.trim();
     
     if (!name || !country) {
-        alert('Please enter at least city name and country');
+        alert(i18n.t('alert.custom.required'));
         return;
     }
     
@@ -323,7 +323,7 @@ document.getElementById('addCustomCityBtn').addEventListener('click', () => {
         city: name,
         country: country,
         emoji: emoji || '🏙️',
-        description: description || `Beautiful city of ${name}`,
+        description: description || `Hermosa ciudad de ${name}`,
         image: image || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
         custom: true
     };
@@ -338,7 +338,7 @@ document.getElementById('addCustomCityBtn').addEventListener('click', () => {
     document.getElementById('customCityDescription').value = '';
     
     renderCityGrid();
-    alert(`Added ${name}!`);
+    alert(i18n.t('alert.custom.added', name));
 });
 
 // Start tournament with selected cities
@@ -409,15 +409,16 @@ function showBracket(gameData) {
     });
     
     Object.keys(rounds).forEach(roundName => {
+        const translatedRound = i18n.t(`bracket.round.${roundName}`) || roundName;
         html += `<div class="bracket-round">
-            <h3>${roundName.charAt(0).toUpperCase() + roundName.slice(1)}</h3>`;
+            <h3>${translatedRound}</h3>`;
         
         rounds[roundName].forEach((match, idx) => {
             html += `<div class="bracket-match ${match.winner ? 'completed' : ''}">
                 <div class="bracket-city">${match.city1.emoji} ${match.city1.city}</div>
                 <div class="vs-small">vs</div>
                 <div class="bracket-city">${match.city2.emoji} ${match.city2.city}</div>
-                ${match.winner ? `<div class="winner-badge">Winner: ${match.winner.city}</div>` : ''}
+                ${match.winner ? `<div class="winner-badge">Ganador: ${match.winner.city}</div>` : ''}
             </div>`;
         });
         
@@ -537,12 +538,12 @@ function startDebatePhase(gameData) {
         
         if (playerData) {
             document.getElementById(`player${idx + 1}Name1`).textContent = playerName;
-            document.getElementById(`player${idx + 1}City1Pros`).textContent = playerData.city1.pros || 'No input';
-            document.getElementById(`player${idx + 1}City1Cons`).textContent = playerData.city1.cons || 'No input';
+            document.getElementById(`player${idx + 1}City1Pros`).textContent = playerData.city1.pros || 'Sin comentarios';
+            document.getElementById(`player${idx + 1}City1Cons`).textContent = playerData.city1.cons || 'Sin comentarios';
             
             document.getElementById(`player${idx + 1}Name2`).textContent = playerName;
-            document.getElementById(`player${idx + 1}City2Pros`).textContent = playerData.city2.pros || 'No input';
-            document.getElementById(`player${idx + 1}City2Cons`).textContent = playerData.city2.cons || 'No input';
+            document.getElementById(`player${idx + 1}City2Pros`).textContent = playerData.city2.pros || 'Sin comentarios';
+            document.getElementById(`player${idx + 1}City2Cons`).textContent = playerData.city2.cons || 'Sin comentarios';
         }
     });
     
@@ -552,7 +553,7 @@ function startDebatePhase(gameData) {
     
     // Start timer
     const debateTime = gameData.debateExtended ? 60 : 300;
-    const timerText = gameData.debateExtended ? '1 minute extended debate' : '5 minutes to discuss';
+    const timerText = gameData.debateExtended ? '1 minuto de debate extendido' : 'Discutí con tu compañero (5 minutos)';
     document.getElementById('debatePhaseInfo').textContent = timerText;
     
     startTimer(gameData.timeRemaining || debateTime, 'debateTimer', async () => {
@@ -571,7 +572,7 @@ async function vote(city) {
         timestamp: Date.now()
     });
     
-    document.getElementById('votingStatus').textContent = `You voted for ${city.city}. Waiting for partner...`;
+    document.getElementById('votingStatus').textContent = `Votaste por ${city.city}. Esperando a tu compañero...`;
     
     // Check if both voted
     checkVotingComplete();

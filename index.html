@@ -1,72 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es-ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>European Cities Tournament Challenge</title>
+    <title>Torneo de Ciudades Europeas</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <!-- Start Screen -->
         <div id="startScreen" class="screen active">
-            <h1>🗺️ Europe Travel Tournament</h1>
-            <p>Compete head-to-head choosing cities for your European adventure!</p>
+            <h1>🗺️ Torneo Viajero por Europa</h1>
+            <p>¡Competí eligiendo ciudades para tu aventura europea!</p>
             <div class="input-group">
-                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <input type="text" id="playerName" placeholder="Ingresá tu nombre" maxlength="20">
             </div>
-            <button id="createGameBtn" class="btn btn-primary">Create New Game</button>
-            <div class="divider">OR</div>
+            <button id="createGameBtn" class="btn btn-primary">Crear Nueva Partida</button>
+            <div class="divider">O</div>
             <div class="input-group">
-                <input type="text" id="gameCode" placeholder="Enter game code" maxlength="6">
+                <input type="text" id="gameCode" placeholder="Ingresá el código de partida" maxlength="6">
             </div>
-            <button id="joinGameBtn" class="btn btn-secondary">Join Game</button>
+            <button id="joinGameBtn" class="btn btn-secondary">Unirse a Partida</button>
         </div>
 
         <!-- Waiting Screen -->
         <div id="waitingScreen" class="screen">
-            <h2>Waiting Room</h2>
+            <h2>Sala de Espera</h2>
             <div class="game-code-display">
-                <p>Game Code:</p>
+                <p>Código de Partida:</p>
                 <div class="code" id="displayGameCode"></div>
             </div>
-            <p class="info-text">Share this code with your partner</p>
+            <p class="info-text">Compartí este código con tu compañero</p>
             <div id="playersList" class="players-list"></div>
-            <button id="startGameBtn" class="btn btn-primary" style="display: none;">Continue to City Selection</button>
-            <button id="leaveWaitingBtn" class="btn btn-secondary">Leave</button>
+            <button id="startGameBtn" class="btn btn-primary" style="display: none;">Continuar a Selección de Ciudades</button>
+            <button id="leaveWaitingBtn" class="btn btn-secondary">Salir</button>
         </div>
 
         <!-- City Selection Screen -->
         <div id="citySelectionScreen" class="screen">
-            <h2>Select Cities for Tournament</h2>
-            <p class="selection-info">Choose 16 cities to compete (Milan & Rome are pre-selected)</p>
+            <h2>Seleccioná Ciudades para el Torneo</h2>
+            <p class="selection-info">Elegí 16 ciudades para competir (Milán y Roma están pre-seleccionadas)</p>
             
             <div class="custom-city-section">
-                <h3>➕ Add Custom City</h3>
+                <h3>➕ Agregar Ciudad Personalizada</h3>
                 <div class="custom-city-form">
-                    <input type="text" id="customCityName" placeholder="City name" maxlength="30">
-                    <input type="text" id="customCityCountry" placeholder="Country" maxlength="30">
+                    <input type="text" id="customCityName" placeholder="Nombre de la ciudad" maxlength="30">
+                    <input type="text" id="customCityCountry" placeholder="País" maxlength="30">
                     <input type="text" id="customCityEmoji" placeholder="Emoji" maxlength="2">
-                    <input type="text" id="customCityImage" placeholder="Image URL (optional)">
-                    <textarea id="customCityDescription" placeholder="Description" maxlength="100"></textarea>
-                    <button id="addCustomCityBtn" class="btn btn-secondary">Add City</button>
+                    <input type="text" id="customCityImage" placeholder="URL de imagen (opcional)">
+                    <textarea id="customCityDescription" placeholder="Descripción" maxlength="100"></textarea>
+                    <button id="addCustomCityBtn" class="btn btn-secondary">Agregar Ciudad</button>
                 </div>
             </div>
             
             <div id="citySelectionGrid" class="city-selection-grid"></div>
             
             <div class="selection-status">
-                <span id="selectionCount">2 / 16 cities selected</span>
+                <span id="selectionCount">2 / 16 ciudades seleccionadas</span>
             </div>
             
-            <button id="startTournamentBtn" class="btn btn-primary" disabled>Start Tournament</button>
+            <button id="startTournamentBtn" class="btn btn-primary" disabled>Iniciar Torneo</button>
         </div>
 
         <!-- Tournament Bracket Screen -->
         <div id="bracketScreen" class="screen">
-            <h2>Tournament Bracket</h2>
+            <h2>Cuadro del Torneo</h2>
             <div id="bracketDisplay" class="bracket-display"></div>
-            <button id="startMatchBtn" class="btn btn-primary">Start Next Match</button>
+            <button id="startMatchBtn" class="btn btn-primary">Iniciar Próxima Ronda</button>
         </div>
 
         <!-- Writing Phase Screen -->
@@ -74,13 +74,13 @@
             <div class="timer-display">
                 <span id="writingTimer">1:00</span>
             </div>
-            <h2>Write About the Cities</h2>
-            <p class="phase-info">You have 1 minute to write pros and cons for each city</p>
+            <h2>Escribí sobre las Ciudades</h2>
+            <p class="phase-info">Tenés 1 minuto para escribir pros y contras de cada ciudad</p>
             
             <div class="dual-city-container">
                 <div class="city-card-writing">
                     <div class="city-image-container">
-                        <img id="city1Image" class="city-image" alt="City landmark">
+                        <img id="city1Image" class="city-image" alt="Monumento de la ciudad">
                     </div>
                     <div class="city-header">
                         <span class="city-emoji" id="city1Emoji"></span>
@@ -88,10 +88,10 @@
                         <p id="city1Country"></p>
                     </div>
                     <div class="writing-area">
-                        <label>Strong Points:</label>
-                        <textarea id="city1Pros" placeholder="What do you like about this city?"></textarea>
-                        <label>Dislikes:</label>
-                        <textarea id="city1Cons" placeholder="What concerns do you have?"></textarea>
+                        <label>Puntos Fuertes:</label>
+                        <textarea id="city1Pros" placeholder="¿Qué te gusta de esta ciudad?"></textarea>
+                        <label>Contras:</label>
+                        <textarea id="city1Cons" placeholder="¿Qué te preocupa?"></textarea>
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
 
                 <div class="city-card-writing">
                     <div class="city-image-container">
-                        <img id="city2Image" class="city-image" alt="City landmark">
+                        <img id="city2Image" class="city-image" alt="Monumento de la ciudad">
                     </div>
                     <div class="city-header">
                         <span class="city-emoji" id="city2Emoji"></span>
@@ -107,10 +107,10 @@
                         <p id="city2Country"></p>
                     </div>
                     <div class="writing-area">
-                        <label>Strong Points:</label>
-                        <textarea id="city2Pros" placeholder="What do you like about this city?"></textarea>
-                        <label>Dislikes:</label>
-                        <textarea id="city2Cons" placeholder="What concerns do you have?"></textarea>
+                        <label>Puntos Fuertes:</label>
+                        <textarea id="city2Pros" placeholder="¿Qué te gusta de esta ciudad?"></textarea>
+                        <label>Contras:</label>
+                        <textarea id="city2Cons" placeholder="¿Qué te preocupa?"></textarea>
                     </div>
                 </div>
             </div>
@@ -121,13 +121,13 @@
             <div class="timer-display">
                 <span id="debateTimer">5:00</span>
             </div>
-            <h2>Debate Time!</h2>
-            <p class="phase-info" id="debatePhaseInfo">Discuss with your partner (5 minutes)</p>
+            <h2>¡Hora del Debate!</h2>
+            <p class="phase-info" id="debatePhaseInfo">Discutí con tu compañero (5 minutos)</p>
             
             <div class="dual-city-comparison">
                 <div class="city-comparison-card">
                     <div class="city-image-container">
-                        <img id="debate1Image" class="city-image" alt="City landmark">
+                        <img id="debate1Image" class="city-image" alt="Monumento de la ciudad">
                     </div>
                     <div class="city-header">
                         <span class="city-emoji" id="debate1Emoji"></span>
@@ -142,7 +142,7 @@
                                 <p id="player1City1Pros"></p>
                             </div>
                             <div class="cons">
-                                <strong>👎 Cons:</strong>
+                                <strong>👎 Contras:</strong>
                                 <p id="player1City1Cons"></p>
                             </div>
                         </div>
@@ -153,19 +153,19 @@
                                 <p id="player2City1Pros"></p>
                             </div>
                             <div class="cons">
-                                <strong>👎 Cons:</strong>
+                                <strong>👎 Contras:</strong>
                                 <p id="player2City1Cons"></p>
                             </div>
                         </div>
                     </div>
-                    <button class="vote-btn" id="voteCity1">Choose This City</button>
+                    <button class="vote-btn" id="voteCity1">Elegir Esta Ciudad</button>
                 </div>
 
                 <div class="vs-divider-large">VS</div>
 
                 <div class="city-comparison-card">
                     <div class="city-image-container">
-                        <img id="debate2Image" class="city-image" alt="City landmark">
+                        <img id="debate2Image" class="city-image" alt="Monumento de la ciudad">
                     </div>
                     <div class="city-header">
                         <span class="city-emoji" id="debate2Emoji"></span>
@@ -180,7 +180,7 @@
                                 <p id="player1City2Pros"></p>
                             </div>
                             <div class="cons">
-                                <strong>👎 Cons:</strong>
+                                <strong>👎 Contras:</strong>
                                 <p id="player1City2Cons"></p>
                             </div>
                         </div>
@@ -191,12 +191,12 @@
                                 <p id="player2City2Pros"></p>
                             </div>
                             <div class="cons">
-                                <strong>👎 Cons:</strong>
+                                <strong>👎 Contras:</strong>
                                 <p id="player2City2Cons"></p>
                             </div>
                         </div>
                     </div>
-                    <button class="vote-btn" id="voteCity2">Choose This City</button>
+                    <button class="vote-btn" id="voteCity2">Elegir Esta Ciudad</button>
                 </div>
             </div>
 
@@ -205,16 +205,17 @@
 
         <!-- Results Screen -->
         <div id="resultsScreen" class="screen">
-            <h2>🎉 Your European Itinerary!</h2>
-            <p class="itinerary-dates">March 5 - March 26</p>
+            <h2>🎉 ¡Tu Itinerario Europeo!</h2>
+            <p class="itinerary-dates">5 de Marzo - 26 de Marzo</p>
             <div id="selectedCities" class="selected-cities"></div>
-            <button id="playAgainBtn" class="btn btn-primary">Plan Another Trip</button>
+            <button id="playAgainBtn" class="btn btn-primary">Planear Otro Viaje</button>
         </div>
     </div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="i18n.js"></script>
     <script src="config.js"></script>
     <script src="cities.js"></script>
     <script src="app-tournament.js"></script>
