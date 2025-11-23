@@ -1,7 +1,7 @@
 // Demo mode - works without Firebase
 let gameState = {
     playerName: null,
-    currentCardIndex: 0,
+    currentCardIndex: -1,
     selectedCities: []
 };
 
@@ -26,7 +26,7 @@ document.getElementById('startDemoBtn').addEventListener('click', () => {
     }
 
     gameState.playerName = playerName;
-    gameState.currentCardIndex = 0;
+    gameState.currentCardIndex = -1;
     gameState.selectedCities = [];
     
     document.getElementById('currentPlayer').textContent = playerName;
@@ -35,22 +35,62 @@ document.getElementById('startDemoBtn').addEventListener('click', () => {
 });
 
 function displayCard() {
-    if (gameState.currentCardIndex >= cities.length) {
+    let city;
+    let cardIndex = gameState.currentCardIndex;
+    
+    // Show fixed start city (London)
+    if (cardIndex === -1) {
+        city = fixedStartCity;
+    }
+    // Show fixed end city (Madrid)
+    else if (cardIndex === cities.length) {
+        city = fixedEndCity;
+    }
+    // Show cities to choose from
+    else if (cardIndex >= 0 && cardIndex < cities.length) {
+        city = cities[cardIndex];
+    }
+    else {
         showResults();
         return;
     }
 
     const card = document.getElementById('currentCard');
-    const city = cities[gameState.currentCardIndex];
-
+    
     card.querySelector('.card-emoji').textContent = city.emoji;
     card.querySelector('.card-city').textContent = city.city;
     card.querySelector('.card-country').textContent = city.country;
     card.querySelector('.card-description').textContent = city.description;
 
-    // Update score
-    document.getElementById('scoreDisplay').textContent = 
-        `Cards: ${gameState.currentCardIndex + 1}/${cities.length}`;
+    // Update score display
+    if (city.isFixed) {
+        // For fixed cities, show the date
+        document.getElementById('scoreDisplay').textContent = city.date;
+    } else {
+        // For selectable cities, show progress
+        document.getElementById('scoreDisplay').textContent = 
+            `Cards: ${cardIndex + 1}/${cities.length}`;
+    }
+
+    // Update controls visibility
+    const controls = document.querySelector('.controls');
+    const indicators = document.querySelector('.choice-indicators');
+    
+    if (city.isFixed) {
+        // Hide controls for fixed cities
+        controls.style.display = 'none';
+        indicators.style.display = 'none';
+        
+        // Auto-advance after 2 seconds
+        setTimeout(() => {
+            gameState.currentCardIndex++;
+            displayCard();
+        }, 2000);
+    } else {
+        // Show controls for selectable cities
+        controls.style.display = 'flex';
+        indicators.style.display = 'flex';
+    }
 
     // Reset card position
     card.style.transform = '';
