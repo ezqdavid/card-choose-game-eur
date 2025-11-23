@@ -11,11 +11,16 @@ let gameState = {
     timerInterval: null,
     timeRemaining: 0,
     myVote: null,
-    winners: []
+    winners: [],
+    debateExtensionCount: 0
 };
 
 let database = null;
 let gameRef = null;
+
+// Game configuration constants
+const MAX_DEBATE_EXTENSIONS = 2;
+const TIEBREAKER_DISPLAY_DURATION = 2000; // milliseconds
 
 // Initialize database
 try {
@@ -122,6 +127,7 @@ document.getElementById('createGameBtn').addEventListener('click', async () => {
             currentRound: 0,
             currentMatch: 0,
             phase: 'waiting',
+            debateExtensionCount: 0,
             createdAt: Date.now()
         });
 
@@ -209,6 +215,7 @@ function setupGameListeners() {
             gameState.currentRound = gameData.currentRound;
             gameState.currentMatch = gameData.currentMatch;
             gameState.bracket = gameData.bracket;
+            gameState.debateExtensionCount = gameData.debateExtensionCount || 0;
 
             switch(gameData.phase) {
                 case 'bracket':
@@ -434,7 +441,8 @@ document.getElementById('startMatchBtn').addEventListener('click', async () => {
     
     await gameRef.update({
         phase: 'writing',
-        timeRemaining: 60 // 1 minute
+        timeRemaining: 60, // 1 minute
+        debateExtensionCount: 0
     });
 });
 
@@ -552,7 +560,16 @@ function startDebatePhase(gameData) {
     
     // Start timer
     const debateTime = gameData.debateExtended ? 60 : 300;
-    const timerText = gameData.debateExtended ? '1 minute extended debate' : '5 minutes to discuss';
+    const extensionCount = gameData.debateExtensionCount || 0;
+    let timerText = gameData.debateExtended ? 
+        `1 minute extended debate (attempt ${extensionCount} of ${MAX_DEBATE_EXTENSIONS})` : 
+        '5 minutes to discuss';
+    
+    // Show tiebreaker message if it exists
+    if (gameData.tiebreaker) {
+        timerText = `⚠️ ${gameData.tiebreaker.message}: ${gameData.tiebreaker.winner}`;
+    }
+    
     document.getElementById('debatePhaseInfo').textContent = timerText;
     
     startTimer(gameData.timeRemaining || debateTime, 'debateTimer', async () => {
@@ -592,14 +609,64 @@ async function checkVotingComplete() {
                 await recordWinner(voteList[0].city);
             }
         } else {
-            // Disagreement - extend debate
-            if (gameState.isHost) {
-                await gameRef.update({
-                    debateExtended: true,
-                    timeRemaining: 60
-                });
-                // Clear votes for revote
-                await gameRef.child(`votes/${matchKey}`).remove();
+            // Disagreement - check extension count
+            const currentExtensionCount = gameState.debateExtensionCount;
+            
+            if (currentExtensionCount < MAX_DEBATE_EXTENSIONS) {
+                // Extend debate for another attempt
+                if (gameState.isHost) {
+                    await gameRef.update({
+                        debateExtended: true,
+                        timeRemaining: 60,
+                        debateExtensionCount: currentExtensionCount + 1
+                    });
+                    // Clear votes for revote
+                    await gameRef.child(`votes/${matchKey}`).remove();
+                    
+                    // Update local state
+                    gameState.debateExtensionCount = currentExtensionCount + 1;
+                }
+            } else {
+                // Max extensions reached - use tiebreaker (random selection)
+                if (gameState.isHost) {
+                    // Safety check: ensure we have exactly 2 votes
+                    if (voteList.length !== 2) {
+                        console.error('Unexpected number of votes for tiebreaker:', voteList.length);
+                        return;
+                    }
+                    
+                    // Randomly select winner from the two voted cities
+                    const randomIndex = Math.floor(Math.random() * 2);
+                    const winnerCity = voteList[randomIndex].city;
+                    
+                    // Show message about tiebreaker
+                    await gameRef.child('tiebreaker').set({
+                        message: 'Could not agree - random selection used',
+                        winner: winnerCity,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Record winner after brief delay for message display
+                    const currentGameCode = gameState.gameCode;
+                    const currentMatchIndex = gameState.currentMatch;
+                    
+                    // Schedule tiebreaker resolution
+                    setTimeout(() => {
+                        // Safety check: only proceed if we're still in the same game and match
+                        if (gameState.gameCode === currentGameCode && 
+                            gameState.currentMatch === currentMatchIndex) {
+                            // Execute async operations and catch any errors
+                            (async () => {
+                                try {
+                                    await gameRef.child('tiebreaker').remove();
+                                    await recordWinner(winnerCity);
+                                } catch (error) {
+                                    console.error('Error in tiebreaker timeout:', error);
+                                }
+                            })();
+                        }
+                    }, TIEBREAKER_DISPLAY_DURATION);
+                }
             }
         }
     }
@@ -671,7 +738,8 @@ async function recordWinner(winnerCityName) {
     await gameRef.update({
         bracket: bracket,
         currentMatch: gameState.currentMatch + 1,
-        phase: 'bracket'
+        phase: 'bracket',
+        debateExtensionCount: 0
     });
 }
 
