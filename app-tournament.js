@@ -539,6 +539,14 @@ function startDebatePhase(gameData) {
     
     // Display writing from both players
     const players = Object.keys(gameData.players || {});
+    
+    // Sort players to ensure consistent order: host first, then other player
+    players.sort((a, b) => {
+        if (a === gameData.host) return -1;
+        if (b === gameData.host) return 1;
+        return a.localeCompare(b);
+    });
+    
     players.forEach((playerId, idx) => {
         const playerData = writingData[playerId];
         const playerName = gameData.players[playerId].name;
@@ -551,6 +559,15 @@ function startDebatePhase(gameData) {
             document.getElementById(`player${idx + 1}Name2`).textContent = playerName;
             document.getElementById(`player${idx + 1}City2Pros`).textContent = playerData.city2.pros || 'Sin comentarios';
             document.getElementById(`player${idx + 1}City2Cons`).textContent = playerData.city2.cons || 'Sin comentarios';
+        } else {
+            // Show placeholder if player hasn't submitted their writing yet
+            document.getElementById(`player${idx + 1}Name1`).textContent = playerName;
+            document.getElementById(`player${idx + 1}City1Pros`).textContent = 'Sin comentarios';
+            document.getElementById(`player${idx + 1}City1Cons`).textContent = 'Sin comentarios';
+            
+            document.getElementById(`player${idx + 1}Name2`).textContent = playerName;
+            document.getElementById(`player${idx + 1}City2Pros`).textContent = 'Sin comentarios';
+            document.getElementById(`player${idx + 1}City2Cons`).textContent = 'Sin comentarios';
         }
     });
     
