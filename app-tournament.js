@@ -11,7 +11,6 @@ let gameState = {
     timerInterval: null,
     timeRemaining: 0,
     myVote: null,
-    winners: [],
     debateExtensionCount: 0
 };
 
@@ -372,14 +371,14 @@ function generateBracketFromSelected(selectedCities) {
     // Shuffle for random matchups
     const shuffled = [...selectedCities].sort(() => Math.random() - 0.5);
     
-    // Create quarterfinals (8 matches with 16 cities)
+    // Create round-of-16 (8 matches with 16 cities)
     const bracket = [];
     for (let i = 0; i < shuffled.length; i += 2) {
         bracket.push({
             city1: shuffled[i],
             city2: shuffled[i + 1],
             winner: null,
-            round: 'quarterfinals'
+            round: 'round-of-16'
         });
     }
     
@@ -673,6 +672,57 @@ async function checkVotingComplete() {
     }
 }
 
+/**
+ * Compute the top 3 winners from the bracket after the final match
+ * Returns: { finalWinner, runnerUp, thirdPlace, winners }
+ */
+function computeTop3(bracket) {
+    // Get the final match
+    const finalMatch = bracket.find(m => m.round === 'final');
+    if (!finalMatch || !finalMatch.winner) {
+        return null;
+    }
+    
+    // Final winner is the winner of the final match
+    const finalWinner = finalMatch.winner;
+    
+    // Runner-up is the other finalist (loser of final)
+    const runnerUp = finalMatch.city1.city === finalWinner.city ? finalMatch.city2 : finalMatch.city1;
+    
+    // Get semifinal matches and their winners
+    const semifinalMatches = bracket.filter(m => m.round === 'semifinals');
+    const semifinalWinners = semifinalMatches.map(m => m.winner);
+    
+    // Third place is one of the semifinal losers (the one not in the final)
+    // We need to find which semifinal loser didn't make it to the final
+    let thirdPlace = null;
+    for (const match of semifinalMatches) {
+        const loser = match.city1.city === match.winner.city ? match.city2 : match.city1;
+        // Check if this loser is NOT in the final (i.e., not the runner-up)
+        if (loser.city !== runnerUp.city && loser.city !== finalWinner.city) {
+            thirdPlace = loser;
+            break;
+        }
+    }
+    
+    // If we couldn't find third place through losers, use the first semifinal winner who isn't the final winner
+    if (!thirdPlace) {
+        thirdPlace = semifinalWinners.find(w => w.city !== finalWinner.city);
+    }
+    
+    // Build the winners array ensuring uniqueness
+    const winners = [finalWinner, runnerUp, thirdPlace].filter((city, index, self) => 
+        city && self.findIndex(c => c && c.city === city.city) === index
+    );
+    
+    return {
+        finalWinner,
+        runnerUp,
+        thirdPlace,
+        winners
+    };
+}
+
 async function recordWinner(winnerCityName) {
     const bracket = gameState.bracket;
     const currentMatch = bracket[gameState.currentMatch];
@@ -682,7 +732,6 @@ async function recordWinner(winnerCityName) {
     
     // Update bracket
     bracket[gameState.currentMatch].winner = winner;
-    gameState.winners.push(winner);
     
     // Check if round is complete
     const roundMatches = bracket.filter(m => m.round === currentMatch.round);
@@ -721,16 +770,20 @@ async function recordWinner(winnerCityName) {
                 round: 'final'
             });
         } else if (currentMatch.round === 'final') {
-            // Tournament complete - take top 3 (final winner + 2 semifinal winners)
-            const semifinalWinners = bracket.filter(m => m.round === 'semifinals').map(m => m.winner);
-            const finalWinner = winner;
-            const top3 = [finalWinner, ...semifinalWinners].slice(0, 3);
+            // Tournament complete - compute top 3 deterministically
+            const top3Result = computeTop3(bracket);
             
-            await gameRef.update({
-                status: 'finished',
-                bracket: bracket,
-                winners: top3
-            });
+            if (top3Result) {
+                await gameRef.update({
+                    status: 'finished',
+                    bracket: bracket,
+                    finalWinner: top3Result.finalWinner,
+                    runnerUp: top3Result.runnerUp,
+                    thirdPlace: top3Result.thirdPlace,
+                    winners: top3Result.winners,
+                    completedAt: Date.now()
+                });
+            }
             return;
         }
     }
@@ -745,8 +798,13 @@ async function recordWinner(winnerCityName) {
 }
 
 // Show results
+let lastGameData = null; // Store for sharing
+
 function showResults(gameData) {
     showScreen('results');
+    
+    // Store for sharing
+    lastGameData = gameData;
     
     const winners = gameData.winners || [];
     const selectedCitiesDiv = document.getElementById('selectedCities');
@@ -793,6 +851,34 @@ function showResults(gameData) {
     
     selectedCitiesDiv.innerHTML = html;
 }
+
+// WhatsApp share handler
+document.getElementById('shareWhatsappBtn').addEventListener('click', () => {
+    if (!lastGameData) {
+        alert('No hay datos de itinerario para compartir');
+        return;
+    }
+    
+    const winners = lastGameData.winners || [];
+    
+    // Build itinerary message
+    let message = `Nuestro itinerario europeo: ${fixedStartCity.city} (${fixedStartCity.date})`;
+    
+    // Add winner cities
+    winners.forEach(city => {
+        message += ` -> ${city.city}`;
+    });
+    
+    // Add end city
+    message += ` -> ${fixedEndCity.city} (${fixedEndCity.date})`;
+    
+    // Encode for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Open WhatsApp with the message
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+});
 
 // Play again
 document.getElementById('playAgainBtn').addEventListener('click', () => {
